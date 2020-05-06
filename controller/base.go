@@ -14,8 +14,10 @@ var (
 
 	Key = model.NewKey()
 
-	String = model.NewString()
+	String    = model.NewString()
 	HashTable = model.NewHashTable()
+	List      = model.NewList()
+	Set       = model.NewSet()
 )
 
 func init() {
@@ -23,9 +25,9 @@ func init() {
 	Bigo[model.BigoKey] = Key
 	//
 	Bigo[model.BigoString] = String
-	//BigoDB[model.BigoList] = db.List
+	Bigo[model.BigoList] = List
 	Bigo[model.BigoHashTable] = HashTable
-	//BigoDB[model.BigoSet] = db.Set
+	Bigo[model.BigoSet] = Set
 
 	// bigoKey
 	bigoKey()
@@ -34,13 +36,13 @@ func init() {
 	bigoString()
 
 	// bigoList
-	//bigoList()
-	//
+	bigoList()
+
 	// bigoHashTable
 	bigoHashTable()
-	//
-	//// bigoSet
-	//bigoSet()
+
+	// bigoSet
+	bigoSet()
 }
 
 // bigoKey namespace
@@ -57,20 +59,21 @@ func bigoString() {
 }
 
 // bigoList namespace
-//func bigoList() {
-//	db.List.Register("LGET", db.ListGET)
-//	db.List.Register("LSET", db.ListSET)
-//	db.List.Register("LAPPEND", db.ListAPPEND)
-//}
-//
+func bigoList() {
+	List.Register("LGET", db.ListGET)
+	List.Register("LSET", db.ListSET)
+	List.Register("LAPPEND", db.ListAPPEND)
+}
+
 // bigoHashTable namespace
 func bigoHashTable() {
 	HashTable.Register("HGET", db.HashTableGET)
 	HashTable.Register("HSET", db.HashTableSET)
+	HashTable.Register("HGETFIELDS", db.HashTableGETFIELDS)
 }
-//
-//// bigoSet namespace
-//func bigoSet() {
-//	db.Set.Register("SGET", db.SetGET)
-//	db.Set.Register("SSET", db.SetSET)
-//}
+
+// bigoSet namespace
+func bigoSet() {
+	Set.Register("SGET", db.SetGET)
+	Set.Register("SSET", db.SetSET)
+}

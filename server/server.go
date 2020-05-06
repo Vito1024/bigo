@@ -1,15 +1,14 @@
 package server
 
 import (
+	"bigo/model"
+	"bigo/utils"
 	"bufio"
 	"encoding/json"
 	"io"
 	"log"
 	"net"
 	"os"
-
-	"bigo/model"
-	"bigo/utils"
 )
 
 var (
@@ -53,10 +52,13 @@ func connHandler(conn net.Conn) {
 	}()
 	defer conn.Close()
 
+	reader := bufio.NewReader(conn)
 	for {
-		reader := bufio.NewReader(conn)
-		cmdBytes, err := reader.ReadBytes('\n')
-		if err != nil && err != io.EOF {
+		cmdBytes, err := reader.ReadBytes('\t')
+		if err != nil {
+			if err == io.EOF {
+				log.Println("Connection closed")
+			}
 			log.Println("An error happened when reader.ReadBytes", err)
 			return
 		}
@@ -68,18 +70,30 @@ func connHandler(conn net.Conn) {
 		}
 		log.Printf("[client id] %s, [command] %s, [args] %s\n", bigoRequest.ClientInfo.ClientId, bigoRequest.CommandName, bigoRequest.Args)
 
-		handler, err := fetchHandler(bigoRequest.CommandName)
-		if err != nil {
-			log.Println(err)
-		}
-		res, err := handler(bigoRequest.Args)
-		if err != nil {
-			res = []byte(err.Error())
-		}
+		// Response generation
+		res := responseGeneration(bigoRequest.CommandName, bigoRequest.Args)
 
 		// Write response
-		if len(res) > 0 && res[len(res)-1] != '\n' || len(res) == 0 {
-			res = append(res, '\n')
+		writeResponseToClient(conn, res)
+	}
+}
+
+func responseGeneration(commandName string, args []byte) (res []byte) {
+	handler, err := fetchHandler(commandName)
+	if err != nil {
+		log.Println(err)
+		return []byte(err.Error())
+	}
+	res, err = handler(args)
+	if err != nil {
+		res = []byte(err.Error())
+	}
+	return
+}
+
+func writeResponseToClient(conn net.Conn, res []byte) {
+	if len(res) > 0 && res[len(res)-1] != '\t' || len(res) == 0 {
+			res = append(res, '\t')
 		}
 		n, err := conn.Write(res)
 		if err != nil {
@@ -87,5 +101,4 @@ func connHandler(conn net.Conn) {
 		} else {
 			log.Println(n, "bytes written")
 		}
-	}
 }

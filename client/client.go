@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -45,12 +46,16 @@ func (client *Client) Serve() {
 
 		// read response
 		reader := bufio.NewReader(client.Conn)
-		respon, err := reader.ReadString('\n')
+		respon, err := reader.ReadString('\t')
 		if err != nil {
+			if err == io.EOF {
+				fmt.Fprintln(os.Stdout, "Connection closed")
+				return
+			}
 			log.Println("[client.Serve](An error happened when read response from server)", err)
 			continue
 		}
-		fmt.Fprint(os.Stdout, respon)
+		fmt.Fprintln(os.Stdout, strings.TrimRight(respon, "\t"))
 	}
 }
 
@@ -62,7 +67,9 @@ func (client *Client) readCommand() (aCommand model.BigoRequest, err error) {
 		if err != nil {
 			return aCommand, err
 		}
-		if cmdStr == "\n" {
+		cmdStr = strings.TrimLeft(cmdStr, " ")
+		cmdStr = strings.TrimRight(cmdStr, " \n")
+		if cmdStr == "\n" || cmdStr == "" {
 			continue
 		}
 
@@ -80,7 +87,7 @@ func (client *Client) sendCommand(cmd model.BigoRequest) error {
 		return err
 	}
 
-	bytes = append(bytes, '\n') // the end of bytes stream
+	bytes = append(bytes, '\t') // the end of bytes stream
 	_, err = client.Conn.Write(bytes)
 	if err != nil {
 		log.Println("client.Conn.Write(bytes) err: ", err)
@@ -90,15 +97,15 @@ func (client *Client) sendCommand(cmd model.BigoRequest) error {
 }
 
 func (client *Client) parseCommand(cmdStr string) (model.BigoRequest, error) {
-	cmdStr = strings.TrimRight(cmdStr, "\n")
 	strs := strings.Split(cmdStr, " ")
+	strs = utils.RemoveElementInStringSlice(strs, "")
 	if len(strs) < 2 {
 		return model.BigoRequest{}, errors.New("Command format error")
 	}
 
 	request := model.BigoRequest{
 		CommandName: strings.ToUpper(strs[0]),
-		Args:        []byte(cmdStr[len(strs[0])+1:]),
+		Args:        []byte(strings.Join(strs[1:], " ")),
 		ClientInfo: model.ClientInfo{
 			ClientId: client.Id,
 		},

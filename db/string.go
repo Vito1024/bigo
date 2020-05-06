@@ -20,7 +20,7 @@ func StringGET(args []byte) ([]byte, error) {
 
 	data, ok := bigoValue.Data.(string)
 	if !ok {
-		return keyTypeErrMessage, keyTypeErr
+		return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 	}
 
 	return []byte(data), nil

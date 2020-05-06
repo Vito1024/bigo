@@ -38,10 +38,10 @@ func (s *Set) Len() uint {
 	return s.length
 }
 
-func (s *Set) GetAll() []interface{} {
-	elements := make([]interface{}, 0, s.length)
+func (s *Set) GetAll() []byte {
+	elements := make([]byte, 0, s.length)
 	for k := range s.values {
-		elements = append(elements, k)
+		elements = append(elements, (k.(string)+" ")...)
 	}
 	return elements
 }
