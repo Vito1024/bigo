@@ -1,14 +1,16 @@
 package model
 
+import "errors"
+
 // Used by BigoObject Type attribute
 const (
-	BigoString    = 1
-	BigoList      = 2
-	BigoHashTable = 3
-	BigoSet       = 4
+	BigoString    = "string"
+	BigoList      = "list"
+	BigoHashTable = "hashtable"
+	BigoSet       = "set"
 
 	// Key operations
-	BigoKey       = 5
+	BigoKey = "key"
 )
 
 // Encoding constant
@@ -18,4 +20,8 @@ const (
 	BigoEncodingHashTable = 12
 	BigoEncodingList      = 13
 	BigoEncodingSet       = 14
+)
+
+var (
+	commandNotSupported = errors.New("command not supported")
 )

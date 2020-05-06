@@ -1,19 +1,10 @@
 package db
 
-import (
-	"bigo/model"
-)
+import "bigo/model"
 
-var List = newList()
+var List = model.NewList()
 
-func newList() *model.List {
-	list := &model.List{
-		Commands: make(map[string]model.Handler),
-		Datas:    make(map[model.BigoObject]model.BigoObject),
-	}
 
-	return list
-}
 
 //func ListGET(key model.BigoObject) {
 //

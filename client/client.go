@@ -1,8 +1,6 @@
 package client
 
 import (
-	"bigo/model"
-	"bigo/utils"
 	"bufio"
 	"encoding/json"
 	"errors"
@@ -11,6 +9,9 @@ import (
 	"net"
 	"os"
 	"strings"
+
+	"bigo/model"
+	"bigo/utils"
 )
 
 type Client struct {
@@ -32,14 +33,22 @@ func (client *Client) Serve() {
 	defer client.Conn.Close()
 
 	for {
-		cmd, _ := client.readCommand()
-		client.sendCommand(cmd)
+		cmd, err := client.readCommand()
+		if err != nil {
+			fmt.Println("[client.Serve]", err)
+			continue
+		}
+		if err = client.sendCommand(cmd); err != nil {
+			fmt.Println("[client.Serve]", err)
+			continue
+		}
 
 		// read response
 		reader := bufio.NewReader(client.Conn)
 		respon, err := reader.ReadString('\n')
 		if err != nil {
-			log.Println("An error happened when read response from server")
+			log.Println("[client.Serve](An error happened when read response from server)", err)
+			continue
 		}
 		fmt.Fprint(os.Stdout, respon)
 	}
@@ -51,13 +60,14 @@ func (client *Client) readCommand() (aCommand model.BigoRequest, err error) {
 		fmt.Print(client.PS)
 		cmdStr, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal("ReadCommand: An error happened", err)
 			return aCommand, err
+		}
+		if cmdStr == "\n" {
+			continue
 		}
 
 		cmd, err := client.parseCommand(cmdStr)
 		if err != nil {
-			log.Fatal("an error happened when parses command")
 			return aCommand, err
 		}
 		return cmd, nil
@@ -67,14 +77,13 @@ func (client *Client) readCommand() (aCommand model.BigoRequest, err error) {
 func (client *Client) sendCommand(cmd model.BigoRequest) error {
 	bytes, err := json.Marshal(cmd)
 	if err != nil {
-		log.Fatal("json.Marshal(cmd) err:", err)
 		return err
 	}
 
 	bytes = append(bytes, '\n') // the end of bytes stream
 	_, err = client.Conn.Write(bytes)
 	if err != nil {
-		log.Fatal("client.Conn.Write(bytes) err: ", err)
+		log.Println("client.Conn.Write(bytes) err: ", err)
 	}
 
 	return nil
@@ -84,7 +93,6 @@ func (client *Client) parseCommand(cmdStr string) (model.BigoRequest, error) {
 	cmdStr = strings.TrimRight(cmdStr, "\n")
 	strs := strings.Split(cmdStr, " ")
 	if len(strs) < 2 {
-		log.Fatal("ParseCommand error, command format error(length is less than 2)")
 		return model.BigoRequest{}, errors.New("Command format error")
 	}
 
@@ -96,25 +104,14 @@ func (client *Client) parseCommand(cmdStr string) (model.BigoRequest, error) {
 		},
 	}
 
-	if !isCommandFormatValid(request) {
-		return model.BigoRequest{}, errors.New("Command not support!, Please check and retry")
-	}
-
 	return request, nil
 }
 
 func connectToServer(address string) net.Conn {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		log.Printf("Connect2Server error %v, ", err)
-		os.Exit(1)
+		log.Fatalf("Connect2Server error %v, ", err)
 	}
 	log.Printf("Connect to %s", conn.RemoteAddr())
 	return conn
-}
-
-func isCommandFormatValid(commandRequest model.BigoRequest) bool {
-	strings.ToUpper(commandRequest.CommandName)
-
-	return true
 }

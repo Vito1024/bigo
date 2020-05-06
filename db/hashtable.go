@@ -1,22 +1,17 @@
 package db
 
-import (
-	"bigo/model"
-)
-
-var HashTable = newHashTable()
-
-func newHashTable() *model.HashTable {
-	hashtable := &model.HashTable{}
-
-	return hashtable
+func HashTableGET(args []byte) ([]byte, error) {
+	return nil, nil
 }
 
+func HashTableGETFIELD(args []byte) ([]byte, error) {
+	return nil, nil
+}
 
-//func HashTableGET(ctx context.Context) {
-//
-//}
-//
-//func HashTableSET(ctx context.Context) {
-//
-//}
+func HashTableSET(args []byte) ([]byte, error) {
+	return nil, nil
+}
+
+func HashTableDEL(args []byte) ([]byte, error) {
+	return nil, nil
+}

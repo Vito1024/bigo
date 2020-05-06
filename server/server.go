@@ -1,9 +1,9 @@
 package server
 
 import (
-	"bigo/controller"
 	"bufio"
 	"encoding/json"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -46,7 +46,7 @@ func Start() {
 }
 
 func connHandler(conn net.Conn) {
-	defer func(){
+	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
 		}
@@ -56,7 +56,7 @@ func connHandler(conn net.Conn) {
 	for {
 		reader := bufio.NewReader(conn)
 		cmdBytes, err := reader.ReadBytes('\n')
-		if err != nil {
+		if err != nil && err != io.EOF {
 			log.Println("An error happened when reader.ReadBytes", err)
 			return
 		}
@@ -65,18 +65,22 @@ func connHandler(conn net.Conn) {
 		bigoRequest := model.BigoRequest{}
 		if err = json.Unmarshal(cmdBytes, &bigoRequest); err != nil {
 			log.Println("An error happened when json.Unmarshal()", err)
-			return
 		}
 		log.Printf("[client id] %s, [command] %s, [args] %s\n", bigoRequest.ClientInfo.ClientId, bigoRequest.CommandName, bigoRequest.Args)
 
-		keyType, err := typeByBigoRequest(bigoRequest)
+		handler, err := fetchHandler(bigoRequest.CommandName)
 		if err != nil {
 			log.Println(err)
 		}
-		// address to the specific namespace by command name
-		res := controller.Bigo[keyType].Call(bigoRequest.CommandName, bigoRequest.Args)
+		res, err := handler(bigoRequest.Args)
+		if err != nil {
+			res = []byte(err.Error())
+		}
 
 		// Write response
+		if len(res) > 0 && res[len(res)-1] != '\n' || len(res) == 0 {
+			res = append(res, '\n')
+		}
 		n, err := conn.Write(res)
 		if err != nil {
 			log.Println("An error happened when write data to conn")
@@ -85,19 +89,3 @@ func connHandler(conn net.Conn) {
 		}
 	}
 }
-
-
-//func NewBigoObjectByRequest(req model.BigoRequest) *model.BigoObject {
-//	bigoObject := &model.BigoObject{}
-//
-//	// bigoObject.Type
-//	_type, err := typeByBigoRequest(req)
-//	if err != nil {
-//		log.Println(err)
-//		return nil
-//	}
-//	bigoObject.Type = _type
-//
-//
-//	return bigoObject
-//}

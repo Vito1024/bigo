@@ -8,16 +8,27 @@ import (
 /*
 	Abstract data type supported to BigoType interface
 */
-var Bigo map[uint8]model.BigoType // Top level namespace
+
+var (
+	Bigo = make(map[string]model.BigoType)
+
+	Key = model.NewKey()
+
+	String = model.NewString()
+	HashTable = model.NewHashTable()
+)
 
 func init() {
 
-	Bigo = make(map[uint8]model.BigoType)
+	Bigo[model.BigoKey] = Key
+	//
+	Bigo[model.BigoString] = String
+	//BigoDB[model.BigoList] = db.List
+	Bigo[model.BigoHashTable] = HashTable
+	//BigoDB[model.BigoSet] = db.Set
 
-	Bigo[model.BigoString] = db.String
-	//Bigo[model.BigoList] = db.List
-	//Bigo[model.BigoHashTable] = db.HashTable
-	//Bigo[model.BigoSet] = db.Set
+	// bigoKey
+	bigoKey()
 
 	// bigoString
 	bigoString()
@@ -25,17 +36,24 @@ func init() {
 	// bigoList
 	//bigoList()
 	//
-	//// bigoHashTable
-	//bigoHashTable()
+	// bigoHashTable
+	bigoHashTable()
 	//
 	//// bigoSet
 	//bigoSet()
 }
 
+// bigoKey namespace
+func bigoKey() {
+	Key.Register("DEL", db.KeyDEL)
+	Key.Register("TYPE", db.KeyTYPE)
+	Key.Register("KEY", db.KeyKEY)
+}
+
 // bigoString namespace
 func bigoString() {
-	db.String.Register("GET", db.StringGET)
-	db.String.Register("SET", db.StringSET)
+	String.Register("GET", db.StringGET)
+	String.Register("SET", db.StringSET)
 }
 
 // bigoList namespace
@@ -45,11 +63,11 @@ func bigoString() {
 //	db.List.Register("LAPPEND", db.ListAPPEND)
 //}
 //
-//// bigoHashTable namespace
-//func bigoHashTable() {
-//	db.HashTable.Register("HGET", db.HashTableGET)
-//	db.HashTable.Register("HSET", db.HashTableSET)
-//}
+// bigoHashTable namespace
+func bigoHashTable() {
+	HashTable.Register("HGET", db.HashTableGET)
+	HashTable.Register("HSET", db.HashTableSET)
+}
 //
 //// bigoSet namespace
 //func bigoSet() {

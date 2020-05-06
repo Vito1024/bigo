@@ -1,11 +1,12 @@
 package model
 
+// If an error happened, return []byte is nil
 type Handler func(args []byte) ([]byte, error)
 
 // abstract of types supported
 type BigoType interface {
-	// Call the function registered in current type
-	Call(commandName string, args []byte) []byte
+	// fetch the function registered from BigoType, if not exists, bool is false
+	Fetch(commandName string) (Handler, bool)
 
 	// register a command to current type
 	Register(commandName string, handler Handler)
