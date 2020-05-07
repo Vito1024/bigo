@@ -6,7 +6,7 @@ package datastructure
 
 type Set struct {
 	values map[interface{}]bool
-	length uint
+	length int
 }
 
 func NewSet() *Set {
@@ -16,7 +16,7 @@ func NewSet() *Set {
 	}
 }
 
-func (s *Set) Append(v interface{}) {
+func (s *Set) Push(v interface{}) {
 	if _, ok := s.values[v]; ok {
 		// already exists, return
 		return
@@ -34,7 +34,7 @@ func (s *Set) Delete(v interface{}) {
 	s.length--
 }
 
-func (s *Set) Len() uint {
+func (s *Set) Len() int {
 	return s.length
 }
 

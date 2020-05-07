@@ -32,6 +32,22 @@ func (l *List) Append(value interface{}) {
 	l.length++
 }
 
+func (l *List) LAppend(value interface{}) {
+	node := &node{
+		value: value,
+	}
+
+	if l.head == nil {
+		l.head = node
+		l.tail = node
+	} else {
+		node.next = l.head
+		l.head.pre = node
+		l.head = node
+	}
+	l.length++
+}
+
 func (l *List) Delete(value interface{}) int {
 	elementDeleted := 0
 	for nd := l.head; nd != nil; nd = nd.next {
@@ -80,6 +96,7 @@ func (l *List) Pop() interface{} {
 	} else {
 		l.tail.next = nil
 	}
+	l.length--
 	return pop.value
 }
 
@@ -95,6 +112,7 @@ func (l *List) LPop() interface{} {
 	} else {
 		l.head.pre = nil
 	}
-	return pop
+	l.length--
+	return pop.value
 }
 

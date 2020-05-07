@@ -58,6 +58,7 @@ func connHandler(conn net.Conn) {
 		if err != nil {
 			if err == io.EOF {
 				log.Println("Connection closed")
+				return
 			}
 			log.Println("An error happened when reader.ReadBytes", err)
 			return

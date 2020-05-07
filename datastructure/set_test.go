@@ -9,7 +9,7 @@ func TestSet_Append(t *testing.T) {
 	s := NewSet()
 	randNum := rand.Intn(30)
 	for i := 0; i < randNum; i++ {
-		s.Append(i)
+		s.Push(i)
 	}
 	t.Log(randNum, "elements appended")
 	t.Log(s.GetAll())
@@ -19,7 +19,7 @@ func TestSet_Delete(t *testing.T) {
 	s := NewSet()
 	randNum := rand.Intn(30)
 	for i := 0; i < randNum; i++ {
-		s.Append(i)
+		s.Push(i)
 	}
 	t.Log(randNum, "elements appended")
 	s.Delete(randNum/2)
@@ -34,7 +34,7 @@ func TestSet_GetAll(t *testing.T) {
 	s := NewSet()
 	randNum := rand.Intn(30)
 	for i := 0; i < randNum; i++ {
-		s.Append(i)
+		s.Push(i)
 	}
 	t.Log(randNum, "elements appended")
 
@@ -45,7 +45,7 @@ func TestSet_Len(t *testing.T) {
 	s := NewSet()
 	randNum := rand.Intn(30)
 	for i := 0; i < randNum; i++ {
-		s.Append(i)
+		s.Push(i)
 	}
 	t.Log(randNum, "elements appended")
 

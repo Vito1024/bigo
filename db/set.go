@@ -3,6 +3,7 @@ package db
 import (
 	"bigo/datastructure"
 	"bigo/model"
+	"strconv"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func SetSET(args []byte) ([]byte, error) {
 
 	data := datastructure.NewSet()
 	for _, v := range argStrs[1:] {
-		data.Append(v)
+		data.Push(v)
 	}
 
 	key := argStrs[0]
@@ -50,4 +51,68 @@ func SetSET(args []byte) ([]byte, error) {
 	BigoDB[key] = bigoValue
 
 	return okMessage, nil
+}
+
+func SetDEL(args []byte) ([]byte, error) {
+	argStrs := strings.Split(string(args), " ")
+	if len(argStrs) < 2 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+	key := argStrs[0]
+
+	if v, ok := BigoDB[key]; ok {
+		data, ok := v.Data.(*datastructure.Set)
+		if !ok {
+			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
+		}
+
+		for _, str := range argStrs[1:] {
+			data.Delete(str)
+		}
+		return okMessage, nil
+	}
+
+	return keyNotFoundMessage, keyNotFoundErr
+}
+
+func SetPUSH (args []byte) ([]byte, error) {
+	argStrs := strings.Split(string(args), " ")
+	if len(argStrs) < 2 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+	key := argStrs[0]
+
+	if v, ok := BigoDB[key]; ok {
+		data, ok := v.Data.(*datastructure.Set)
+		if !ok {
+			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
+		}
+
+		for _, str := range argStrs[1:] {
+			data.Push(str)
+		}
+
+		return okMessage, nil
+	}
+
+	return keyNotFoundMessage, keyNotFoundErr
+}
+
+func SetLEN(args []byte) ([]byte, error) {
+	argStrs := strings.Split(string(args), " ")
+	if len(argStrs) != 1 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+	key := argStrs[0]
+
+	if v, ok := BigoDB[key]; ok {
+		data, ok := v.Data.(*datastructure.Set)
+		if !ok {
+			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
+		}
+
+		return []byte(strconv.Itoa(data.Len())), nil
+	}
+
+	return keyNotFoundMessage, keyNotFoundErr
 }

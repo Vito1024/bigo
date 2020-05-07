@@ -62,7 +62,12 @@ func bigoString() {
 func bigoList() {
 	List.Register("LGET", db.ListGET)
 	List.Register("LSET", db.ListSET)
-	List.Register("LAPPEND", db.ListAPPEND)
+	List.Register("APPEND", db.ListAPPEND)
+	List.Register("LAPPEND", db.ListLAPPEND)
+	List.Register("POP", db.ListPOP)
+	List.Register("LPOP", db.ListLPOP)
+	List.Register("LDEL", db.ListDEL)
+	List.Register("LLEN", db.ListLEN)
 }
 
 // bigoHashTable namespace
@@ -70,10 +75,16 @@ func bigoHashTable() {
 	HashTable.Register("HGET", db.HashTableGET)
 	HashTable.Register("HSET", db.HashTableSET)
 	HashTable.Register("HGETFIELDS", db.HashTableGETFIELDS)
+	HashTable.Register("HSETFIELD", db.HashTableSETFIELD)
+	HashTable.Register("HSETMULTIFIELDS", db.HashTableSETMULTIFIELDS)
+	HashTable.Register("HLEN", db.HashTableLEN)
 }
 
 // bigoSet namespace
 func bigoSet() {
 	Set.Register("SGET", db.SetGET)
 	Set.Register("SSET", db.SetSET)
+	Set.Register("SPUSH", db.SetPUSH)
+	Set.Register("SDEL", db.SetDEL)
+	Set.Register("SLEN", db.SetLEN)
 }
