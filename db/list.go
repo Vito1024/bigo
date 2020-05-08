@@ -1,18 +1,17 @@
 package db
 
 import (
+	"strconv"
+
 	"bigo/datastructure"
 	"bigo/model"
-	"strconv"
-	"strings"
 )
 
-func ListGET(args []byte) ([]byte, error) {
-	argStr := strings.Split(string(args), " ")
-	if len(argStr) != 1 {
+func ListGET(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStr[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
@@ -23,7 +22,7 @@ func ListGET(args []byte) ([]byte, error) {
 		res := make([]byte, 0, len(_data))
 		for _, v := range _data {
 			s := v.(string)
-			res = append(res, (s+" ")...)
+			res = append(res, (s + " ")...)
 		}
 
 		return res, nil
@@ -32,18 +31,17 @@ func ListGET(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListSET(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) < 2 {
+func ListSET(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok && v.Type != model.BigoList {
 		return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 	}
 
 	data := &datastructure.List{}
-	for _, v := range argStrs[1:] {
+	for _, v := range args[1:] {
 		data.Append(v)
 	}
 
@@ -56,19 +54,18 @@ func ListSET(args []byte) ([]byte, error) {
 	return okMessage, nil
 }
 
-func ListAPPEND(args []byte) ([]byte, error) {
-	argStr := strings.Split(string(args), " ")
-	if len(argStr) < 2 {
+func ListAPPEND(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStr[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
 		if !ok {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
-		for _, v := range argStr[1:] {
+		for _, v := range args[1:] {
 			data.Append(v)
 		}
 
@@ -78,19 +75,18 @@ func ListAPPEND(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListLAPPEND(args []byte) ([]byte, error) {
-	argStr := strings.Split(string(args), " ")
-	if len(argStr) < 2 {
+func ListLAPPEND(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStr[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
 		if !ok {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
-		for _, v := range argStr[1:] {
+		for _, v := range args[1:] {
 			data.LAppend(v)
 		}
 
@@ -100,48 +96,55 @@ func ListLAPPEND(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListPOP(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 1 {
+func ListPOP(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
 		if !ok {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
-		value := data.Pop().(string)
-		return []byte(value), nil
+		value := data.Pop()
+		if value != nil {
+			return []byte(value.(string)), nil
+		} else {
+			return emptyKeyMessage, emptyKeyErr
+		}
 	}
 
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListLPOP(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 1 {
+func ListLPOP(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
 		if !ok {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
-		value := data.LPop().(string)
-		return []byte(value), nil
+		value := data.LPop()
+		if value != nil {
+			return []byte(value.(string)), nil
+		} else {
+			return emptyKeyMessage, emptyKeyErr
+		}
 	}
 
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListDEL(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) < 2 { return argsFormatWrongMessage, argsFormatWrongErr }
-	key := argStrs[0]
+func ListDEL(args []string) ([]byte, error) {
+	if len(args) < 2 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)
@@ -149,7 +152,7 @@ func ListDEL(args []byte) ([]byte, error) {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
 
-		for _, str := range argStrs[1:] {
+		for _, str := range args[1:] {
 			data.Delete(str)
 		}
 		return okMessage, nil
@@ -158,12 +161,11 @@ func ListDEL(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func ListLEN(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 1 {
+func ListLEN(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.List)

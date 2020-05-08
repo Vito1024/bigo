@@ -4,16 +4,14 @@ import (
 	"bigo/datastructure"
 	"bigo/model"
 	"strconv"
-	"strings"
 )
 
-func SetGET(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 1 {
+func SetGET(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	key := argStrs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok {
 		_data, ok := v.Data.(*datastructure.Set)
 		if !ok {
@@ -26,26 +24,25 @@ func SetGET(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func SetSET(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) < 2 {
+func SetSET(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
 	data := datastructure.NewSet()
-	for _, v := range argStrs[1:] {
+	for _, v := range args[1:] {
 		data.Push(v)
 	}
 
-	key := argStrs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok && v.Type != model.BigoSet {
 		return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 	}
 
 	bigoValue := &model.BigoValue{
-		Type: model.BigoSet,
+		Type:     model.BigoSet,
 		Encoding: model.BigoEncodingSet,
-		Data: data,
+		Data:     data,
 	}
 
 	BigoDB[key] = bigoValue
@@ -53,12 +50,11 @@ func SetSET(args []byte) ([]byte, error) {
 	return okMessage, nil
 }
 
-func SetDEL(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) < 2 {
+func SetDEL(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.Set)
@@ -66,7 +62,7 @@ func SetDEL(args []byte) ([]byte, error) {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
 
-		for _, str := range argStrs[1:] {
+		for _, str := range args[1:] {
 			data.Delete(str)
 		}
 		return okMessage, nil
@@ -75,12 +71,11 @@ func SetDEL(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func SetPUSH (args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) < 2 {
+func SetPUSH(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.Set)
@@ -88,7 +83,7 @@ func SetPUSH (args []byte) ([]byte, error) {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
 
-		for _, str := range argStrs[1:] {
+		for _, str := range args[1:] {
 			data.Push(str)
 		}
 
@@ -98,12 +93,11 @@ func SetPUSH (args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func SetLEN(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 1 {
+func SetLEN(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(*datastructure.Set)

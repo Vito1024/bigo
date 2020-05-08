@@ -1,7 +1,7 @@
 package model
 
 // If an error happened, return []byte is nil
-type Handler func(args []byte) ([]byte, error)
+type Handler func(args []string) ([]byte, error)
 
 // abstract of types supported
 type BigoType interface {

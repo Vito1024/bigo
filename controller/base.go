@@ -50,6 +50,9 @@ func bigoKey() {
 	Key.Register("DEL", db.KeyDEL)
 	Key.Register("TYPE", db.KeyTYPE)
 	Key.Register("KEY", db.KeyKEY)
+	Key.Register("PING", db.KeyPING)
+	Key.Register("DUMP", db.KeyDUMP)
+	Key.Register("RECOVER", db.KeyRECOVER)
 }
 
 // bigoString namespace

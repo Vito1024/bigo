@@ -2,18 +2,15 @@ package db
 
 import (
 	"bigo/model"
-	"bytes"
-	"strings"
 )
 
 
-func StringGET(args []byte) ([]byte, error) {
-	bytesSlice := bytes.Split(args, []byte{' '})
-	if len(bytesSlice) != 1 {
+func StringGET(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	bigoValue, ok := BigoDB[string(args)]
+	bigoValue, ok := BigoDB[args[0]]
 	if !ok {
 		return keyNotFoundMessage, keyNotFoundErr
 	}
@@ -26,13 +23,12 @@ func StringGET(args []byte) ([]byte, error) {
 	return []byte(data), nil
 }
 
-func StringSET(args []byte) ([]byte, error) {
-	strs := strings.Split(string(args), " ")
-	if len(strs) != 2 {
+func StringSET(args []string) ([]byte, error) {
+	if len(args) != 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	key := strs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok && v.Type != model.BigoString {
 		return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 	}
@@ -40,7 +36,7 @@ func StringSET(args []byte) ([]byte, error) {
 	value := &model.BigoValue{
 		Type:     model.BigoString,
 		Encoding: model.BigoEncodingString,
-		Data:     strs[1],
+		Data:     args[1],
 	}
 
 	BigoDB[key] = value

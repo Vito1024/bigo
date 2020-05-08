@@ -1,28 +1,30 @@
 package db
 
 import (
+	"bigo/model"
+	"encoding/json"
+	"io/ioutil"
+	"os"
 	"strings"
 )
 
-func KeyDEL(args []byte) ([]byte, error) {
-	strs := strings.Split(string(args), " ")
-	if len(strs) < 1 {
+func KeyDEL(args []string) ([]byte, error) {
+	if len(args) < 1 {
 		return nil, argsFormatWrongErr
 	}
 
-	for _, str := range strs {
+	for _, str := range args {
 		delete(BigoDB, str)
 	}
 
 	return okMessage, nil
 }
 
-func KeyTYPE(args []byte) ([]byte, error) {
-	strs := strings.Split(string(args), " ")
-	if len(strs) != 1 {
+func KeyTYPE(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return nil, argsFormatWrongErr
 	}
-	key := strs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		return []byte(v.Type), nil
@@ -31,25 +33,86 @@ func KeyTYPE(args []byte) ([]byte, error) {
 	}
 }
 
-func KeyKEY(args []byte) ([]byte, error) {
-	strs := strings.Split(string(args), " ")
-	if len(strs) != 1 {
+func KeyKEY(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return nil, argsFormatWrongErr
 	}
-	strs[0] = strings.ToLower(strs[0])
+	args[0] = strings.ToLower(args[0])
 
 	res := make([]byte, 0)
-	if strs[0] == "*" {
+	if args[0] == "*" {
 		for k := range BigoDB {
 			res = append(res, []byte(k+"\n")...)
 		}
 	} else {
 		for k, v := range BigoDB {
-			if v.Type == strs[0] {
+			if v.Type == args[0] {
 				res = append(res, []byte(k+"\n")...)
 			}
 		}
 	}
+	if len(res) != 0 && res[len(res)-1]=='\n' {
+		// trim last '\n'
+		res = res[:len(res)-1]
+	}
 
 	return res, nil
+}
+
+func KeyPING(args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	return []byte("pong"), nil
+}
+
+func KeyDUMP(args []string) ([]byte, error) {
+	if len(args) != 0  {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	byteStream, err := json.Marshal(BigoDB)
+	if err != nil {
+		return []byte(err.Error()), err
+	}
+
+	err = writeToDisk(byteStream)
+	if err != nil {
+		return []byte(err.Error()), err
+	}
+	return okMessage, nil
+}
+
+func writeToDisk(byteStream []byte) error {
+	if err := ioutil.WriteFile("/var/tmp/bigoDump.json", byteStream, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func KeyRECOVER(args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	file, err := os.Open("/var/tmp/bigoDump.json")
+	if err != nil {
+		return []byte(err.Error()), err
+	}
+	defer file.Close()
+
+	byteStream, err := ioutil.ReadAll(file)
+	if err != nil {
+		return []byte(err.Error()), err
+	}
+
+	newDB := make(map[string]*model.BigoValue)
+	err = json.Unmarshal(byteStream, &newDB)
+	if err != nil {
+		return []byte(err.Error()), nil
+	}
+
+	BigoDB = newDB
+	return okMessage, nil
 }

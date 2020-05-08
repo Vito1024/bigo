@@ -2,7 +2,7 @@ package model
 
 type BigoRequest struct {
 	CommandName string     `json:"name"`
-	Args        []byte     `json:"args"`
+	Args        []string   `json:"args"`
 	ClientInfo  ClientInfo `json:"client_info"`
 }
 

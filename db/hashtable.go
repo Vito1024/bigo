@@ -4,16 +4,14 @@ import (
 	"bigo/model"
 	"encoding/json"
 	"strconv"
-	"strings"
 )
 
-func HashTableGET(args []byte) ([]byte, error) {
-	argsStrs := strings.Split(string(args), " ")
-	if len(argsStrs) != 1 {
+func HashTableGET(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	key := argsStrs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok {
 		if v.Type != model.BigoHashTable {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
@@ -24,13 +22,12 @@ func HashTableGET(args []byte) ([]byte, error) {
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func HashTableGETFIELDS(args []byte) ([]byte, error) {
-	argsStr := strings.Split(string(args), " ")
-	if len(argsStr) < 2 {
+func HashTableGETFIELDS(args []string) ([]byte, error) {
+	if len(args) < 2 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	mapBytes, err := HashTableGET([]byte(argsStr[0]))
+	mapBytes, err := HashTableGET(args[:1])
 	if err != nil {
 		return mapBytes, err
 	}
@@ -41,7 +38,7 @@ func HashTableGETFIELDS(args []byte) ([]byte, error) {
 	}
 
 	var res = make([]byte, 0, 20)
-	for _, k := range argsStr[1:] {
+	for _, k := range args[1:] {
 		if v, ok := data[k]; ok {
 			res = append(res, (v+"\n")...)
 		} else {
@@ -49,21 +46,24 @@ func HashTableGETFIELDS(args []byte) ([]byte, error) {
 			res = append(res, "\n"...)
 		}
 	}
+
+	if len(res) > 0 && res[len(res)-1] == '\n' {
+		res = res[:len(res)-1]
+	}
 	return res, nil
 }
 
-func HashTableSET(args []byte) ([]byte, error) {
-	argsStrs := strings.Split(string(args), " ")
-	if len(argsStrs) < 3 || len(argsStrs) % 2 == 0 {
+func HashTableSET(args []string) ([]byte, error) {
+	if len(args) < 3 || len(args) % 2 == 0 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
 
-	hashTable := make(map[string]string, len(argsStrs)/2)
-	for i := 1; i < len(argsStrs); i += 2 {
-		hashTable[argsStrs[i]] = argsStrs[i+1]
+	hashTable := make(map[string]string, len(args)/2)
+	for i := 1; i < len(args); i += 2 {
+		hashTable[args[i]] = args[i+1]
 	}
 
-	key := argsStrs[0]
+	key := args[0]
 	if v, ok := BigoDB[key]; ok && v.Type != model.BigoHashTable {
 		return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 	}
@@ -76,12 +76,11 @@ func HashTableSET(args []byte) ([]byte, error) {
 	return okMessage, nil
 }
 
-func HashTableSETFIELD(args []byte) ([]byte, error) {
-	argStrs := strings.Split(string(args), " ")
-	if len(argStrs) != 3 {
+func HashTableSETFIELD(args []string) ([]byte, error) {
+	if len(args) != 3 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStrs[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(map[string]string)
@@ -89,19 +88,18 @@ func HashTableSETFIELD(args []byte) ([]byte, error) {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
 
-		data[argStrs[1]] = data[argStrs[2]]
+		data[args[1]] = data[args[2]]
 		return okMessage, nil
 	}
 
 	return keyNotFoundMessage, keyNotFoundErr
 }
 
-func HashTableSETMULTIFIELDS(args []byte) ([]byte, error) {
-	argStr := strings.Split(string(args), " ")
-	if len(argStr) < 3 && len(argStr)%2 == 0 {
+func HashTableSETMULTIFIELDS(args []string) ([]byte, error) {
+	if len(args) < 3 && len(args)%2 == 0 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStr[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(map[string]string)
@@ -109,8 +107,8 @@ func HashTableSETMULTIFIELDS(args []byte) ([]byte, error) {
 			return keyAlreadyExistsButTypeNotMatchMessage, keyAlreadyExistButTypeNotMatchErr
 		}
 
-		for i := 2; i < len(argStr); i += 2 {
-			data[argStr[i-1]] = argStr[i]
+		for i := 2; i < len(args); i += 2 {
+			data[args[i-1]] = args[i]
 		}
 		return okMessage, nil
 	}
@@ -119,12 +117,11 @@ func HashTableSETMULTIFIELDS(args []byte) ([]byte, error) {
 }
 
 
-func HashTableLEN(args []byte) ([]byte, error) {
-	argStr := strings.Split(string(args), " ")
-	if len(argStr) != 1 {
+func HashTableLEN(args []string) ([]byte, error) {
+	if len(args) != 1 {
 		return argsFormatWrongMessage, argsFormatWrongErr
 	}
-	key := argStr[0]
+	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
 		data, ok := v.Data.(map[string]string)

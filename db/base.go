@@ -24,10 +24,12 @@ var (
 	keyTypeErrMessage                      = []byte("key type is wrong")
 	argsFormatWrongMessage                 = []byte("args format is wrong")
 	keyAlreadyExistsButTypeNotMatchMessage = []byte("key already exists but type not match")
+	emptyKeyMessage                        = []byte("empty key")
 
 	// Error
 	keyNotFoundErr                    = errors.New(string(keyNotFoundMessage))
 	keyTypeErr                        = errors.New(string(keyTypeErrMessage))
 	argsFormatWrongErr                = errors.New(string(argsFormatWrongMessage))
 	keyAlreadyExistButTypeNotMatchErr = errors.New(string(keyAlreadyExistsButTypeNotMatchMessage))
+	emptyKeyErr                       = errors.New(string(emptyKeyMessage))
 )

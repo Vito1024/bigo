@@ -79,7 +79,7 @@ func connHandler(conn net.Conn) {
 	}
 }
 
-func responseGeneration(commandName string, args []byte) (res []byte) {
+func responseGeneration(commandName string, args []string) (res []byte) {
 	handler, err := fetchHandler(commandName)
 	if err != nil {
 		log.Println(err)

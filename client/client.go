@@ -3,7 +3,6 @@ package client
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -97,15 +96,14 @@ func (client *Client) sendCommand(cmd model.BigoRequest) error {
 }
 
 func (client *Client) parseCommand(cmdStr string) (model.BigoRequest, error) {
-	strs := strings.Split(cmdStr, " ")
-	strs = utils.RemoveElementInStringSlice(strs, "")
-	if len(strs) < 2 {
-		return model.BigoRequest{}, errors.New("Command format error")
+	strs, err := utils.Split(cmdStr, ' ')
+	if err != nil {
+		return model.BigoRequest{}, err
 	}
 
 	request := model.BigoRequest{
 		CommandName: strings.ToUpper(strs[0]),
-		Args:        []byte(strings.Join(strs[1:], " ")),
+		Args:        strs[1:],
 		ClientInfo: model.ClientInfo{
 			ClientId: client.Id,
 		},
