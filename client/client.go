@@ -38,21 +38,15 @@ func (client *Client) Serve() {
 			fmt.Println("[client.Serve]", err)
 			continue
 		}
-		if err = client.sendCommand(cmd); err != nil {
+		if err = client.SendCommand(cmd); err != nil {
 			fmt.Println("[client.Serve]", err)
 			continue
 		}
 
 		// read response
-		reader := bufio.NewReader(client.Conn)
-		respon, err := reader.ReadString('\t')
+		respon, err := client.ReadResponse()
 		if err != nil {
-			if err == io.EOF {
-				fmt.Fprintln(os.Stdout, "Connection closed")
-				return
-			}
-			log.Println("[client.Serve](An error happened when read response from server)", err)
-			continue
+			if err == io.EOF { return } else { continue }
 		}
 		fmt.Fprintln(os.Stdout, strings.TrimRight(respon, "\t"))
 	}
@@ -80,7 +74,7 @@ func (client *Client) readCommand() (aCommand model.BigoRequest, err error) {
 	}
 }
 
-func (client *Client) sendCommand(cmd model.BigoRequest) error {
+func (client *Client) SendCommand(cmd model.BigoRequest) error {
 	bytes, err := json.Marshal(cmd)
 	if err != nil {
 		return err
@@ -93,6 +87,20 @@ func (client *Client) sendCommand(cmd model.BigoRequest) error {
 	}
 
 	return nil
+}
+
+func (client *Client) ReadResponse() (string, error) {
+	reader := bufio.NewReader(client.Conn)
+	respon, err := reader.ReadString('\t')
+	if err != nil {
+		if err == io.EOF {
+			fmt.Fprintln(os.Stdout, "Connection closed")
+			return "", io.EOF
+		}
+		log.Println("[client.Serve](An error happened when read response from server)", err)
+		return "", err
+	}
+	return respon, nil
 }
 
 func (client *Client) parseCommand(cmdStr string) (model.BigoRequest, error) {
