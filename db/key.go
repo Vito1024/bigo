@@ -1,11 +1,14 @@
 package db
 
 import (
-	"bigo/model"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
+	"errors"
+
+	"bigo/model"
 )
 
 func KeyDEL(args []string) ([]byte, error) {
@@ -27,7 +30,7 @@ func KeyTYPE(args []string) ([]byte, error) {
 	key := args[0]
 
 	if v, ok := BigoDB[key]; ok {
-		return []byte(v.Type), nil
+	return []byte(v.Type), nil
 	} else {
 		return nil, keyNotFoundErr
 	}
@@ -66,6 +69,40 @@ func KeyPING(args []string) ([]byte, error) {
 
 	return []byte("pong"), nil
 }
+
+func KeyCOUNT(args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	return []byte(strconv.Itoa(len(BigoDB))), nil
+}
+
+func KeySELECT(args []string) ([]byte, error) {
+	if len(args) != 1 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+	_namespace, err := strconv.Atoi(args[0])
+	if err != nil {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	if _namespace > 15 || _namespace < 0 {
+		return []byte("out of range"), errors.New("out of range")
+	}
+	BigoDB = BigoDBS[_namespace]
+	namespace = _namespace
+	return okMessage, nil
+}
+
+func KeyDB(args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return argsFormatWrongMessage, argsFormatWrongErr
+	}
+
+	return []byte(strconv.Itoa(namespace)), nil
+}
+
 
 func KeyDUMP(args []string) ([]byte, error) {
 	if len(args) != 0  {

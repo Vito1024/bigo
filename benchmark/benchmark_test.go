@@ -67,7 +67,7 @@ func BenchmarkBigo(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// GET
 		bq.CommandName = "HGET"
-		bq.Args = []string{"user:10000001"}
+		bq.Args = []string{"9887"}
 		err = cli.SendCommand(bq)
 		_, err = cli.ReadResponse()
 		if err != nil {

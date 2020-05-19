@@ -1,13 +1,44 @@
 package model
 
-// If an error happened, return []byte is nil
+/* 
+	The Handler abstracts commands implementation of bigo.
+
+
+	If an error happened, return []byte is nil
+*/
 type Handler func(args []string) ([]byte, error)
 
-// abstract of types supported
+/* Abstract of bigo types */
 type BigoType interface {
-	// fetch the function registered from BigoType, if not exists, bool is false
+	/* 
+		Fetch the function registered in it from specific BigoType, 
+	if not exists, bool is false 
+	*/
 	Fetch(commandName string) (Handler, bool)
 
-	// register a command to current type
+	/* Register a command to current type */
 	Register(commandName string, handler Handler)
+}
+
+type baseType struct {
+	Commands map[string]Handler
+}
+
+func newbaseType() *baseType {
+	bt := &baseType{
+		Commands: make(map[string]Handler),
+	}
+
+	return bt
+}
+
+func (bt *baseType) Register(commandName string, handler Handler) {
+	bt.Commands[commandName] = handler
+}
+
+func (bt *baseType) Fetch(commandName string) (Handler, bool) {
+	if handler, ok := bt.Commands[commandName]; ok {
+		return handler, true
+	}
+	return nil, false
 }

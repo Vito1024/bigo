@@ -1,8 +1,9 @@
 package db
 
 import (
-	"bigo/model"
 	"errors"
+
+	"bigo/model"
 )
 
 /*
@@ -10,11 +11,23 @@ import (
 	In db package, all operations are operated on model.BigoObject
 */
 
+const (
+	dbCount = 16
+)
+
 // Global BigoDB object represents the top level namespace, current database
-var BigoDB map[string]*model.BigoValue
+var (
+	BigoDBS [dbCount]map[string]*model.BigoValue
+	BigoDB map[string]*model.BigoValue
+	namespace = 0
+)
 
 func init() {
-	BigoDB = make(map[string]*model.BigoValue)
+	for i := 0; i < dbCount; i++ {
+		BigoDBS[i] = make(map[string]*model.BigoValue)
+	}
+
+	BigoDB = BigoDBS[namespace]
 }
 
 var (

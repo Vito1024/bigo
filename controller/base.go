@@ -51,6 +51,9 @@ func bigoKey() {
 	Key.Register("TYPE", db.KeyTYPE)
 	Key.Register("KEY", db.KeyKEY)
 	Key.Register("PING", db.KeyPING)
+	Key.Register("SELECT", db.KeySELECT)
+	Key.Register("DB", db.KeyDB)
+	Key.Register("COUNT", db.KeyCOUNT)
 	Key.Register("DUMP", db.KeyDUMP)
 	Key.Register("RECOVER", db.KeyRECOVER)
 }
