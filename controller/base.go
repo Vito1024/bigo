@@ -18,6 +18,8 @@ var (
 	HashTable = model.NewHashTable()
 	List      = model.NewList()
 	Set       = model.NewSet()
+
+	BT        = model.NewBinaryTree()
 )
 
 func init() {
@@ -28,6 +30,7 @@ func init() {
 	Bigo[model.BigoList] = List
 	Bigo[model.BigoHashTable] = HashTable
 	Bigo[model.BigoSet] = Set
+	Bigo[model.BigoBinaryTree] = BT
 
 	// bigoKey
 	bigoKey()
@@ -43,6 +46,9 @@ func init() {
 
 	// bigoSet
 	bigoSet()
+
+	// bigoBinaryTree
+	bigoBinaryTree()
 }
 
 // bigoKey namespace
@@ -93,4 +99,9 @@ func bigoSet() {
 	Set.Register("SPUSH", db.SetPUSH)
 	Set.Register("SDEL", db.SetDEL)
 	Set.Register("SLEN", db.SetLEN)
+}
+
+func bigoBinaryTree() {
+	BT.Register("BTGET", db.BTGET)
+	BT.Register("BTSET", db.BTSET)
 }

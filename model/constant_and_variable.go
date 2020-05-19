@@ -9,6 +9,8 @@ const (
 	BigoHashTable = "hashtable"
 	BigoSet       = "set"
 
+	BigoBinaryTree= "binarytree"
+
 	// Key operations
 	BigoKey = "key"
 )

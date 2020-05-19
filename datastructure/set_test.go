@@ -49,7 +49,7 @@ func TestSet_Len(t *testing.T) {
 	}
 	t.Log(randNum, "elements appended")
 
-	if s.Len() != uint(randNum) {
+	if s.Len() != randNum {
 		t.Fail()
 	}
 }
